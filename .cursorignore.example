@@ -1,0 +1,16 @@
+# Example only.
+# Rename to .cursorignore only after confirming these paths should not be visible to Cursor.
+
+# Large generated data
+data/raw/
+artifacts/
+outputs/
+checkpoints/
+
+# Build outputs
+build/
+dist/
+
+# Dependencies
+node_modules/
+.venv/
