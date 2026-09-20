@@ -1,0 +1,7 @@
+# Discoveries
+
+## D-001
+
+<USEFUL_OBSERVATION_NOT_YET_A_FACT_OR_DECISION>
+
+Evidence: <SOURCE>

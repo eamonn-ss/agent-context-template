@@ -1,42 +1,25 @@
-# Current Project State
+# V1 Compatibility State
 
-> This is the short-lived global state. Keep it concise and overwrite stale information.
-
-**Last updated:** 2026-08-11
+**Last updated:** 2026-09-19
 
 ## Current Objective
 
-Maintain this AI project-context template: keep protocol docs, scripts, and skeletons consistent and safe for adoption.
+V2 implementation is complete. Canonical project state now lives in `.agent/`.
 
 ## Active Task
 
-None
+`TASK-001-v2-context-lifecycle` — Done
 
 ## Current Status
 
-- Template skeleton is complete under `.ai/`, `AGENTS.md`, and Cursor rule
-- Reusable file templates live only in `.ai/templates/`
-- Init and check scripts support partial installs and placeholder warnings
+- `.ai/` is retained for V1 migration and is not writable V2 state.
+- Use `.agent/CURRENT_TASK.md` and `.agent/HANDOFF.md` for current work.
+- See `docs/migration-v1-to-v2.md` for the one-time migration path.
 
 ## Current Blockers
 
-- None
-
-## Recent Verified Findings
-
-- `./scripts/check-context.sh` validates required files and warns on bootstrap leftovers
-- `./scripts/init-ai-context.sh` merges missing files into an existing/empty `.ai/` tree
-
-## Working Tree Notes
-
-- Repository may still have uncommitted template files; check `git status` before editing
+None.
 
 ## Next Action
 
-Adopt into a real project with `./scripts/init-ai-context.sh /path/to/project`, or commit this template skeleton if publishing.
-
-## Do Not Accidentally Change
-
-- Layered context protocol in `AGENTS.md`
-- Source-of-truth priority order
-- Separation of stable (`context.md`) vs active (`current.md` / `tasks/`) state
+Review and commit the V2 upgrade, then validate it in an adopted project.

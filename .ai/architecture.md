@@ -1,4 +1,7 @@
-# Current Architecture
+# V1 Legacy Architecture
+
+> This documents the retained V1 layout. The current V2 architecture is
+> `.agent/ARCHITECTURE.md`; do not update both trees in parallel.
 
 > Describe the architecture as it exists now. Historical architecture belongs in ADRs or Git history.
 >

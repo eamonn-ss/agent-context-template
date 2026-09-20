@@ -1,122 +1,95 @@
 # Repository Agent Protocol
 
-This file is the canonical entry point for AI coding agents working in this repository.
+This is the vendor-neutral entry point for AI coding agents in this repository.
+User requirements govern scope; the priority below governs claims about project
+state. V2 canonical state lives under `.agent/`.
 
-## 1. Restore Context Before Work
+## 1. Context Protocol
 
-Before making non-trivial changes:
+```text
+Rules   = this file: durable behavior
+Skills  = .agents/skills/: how to perform context operations
+State   = .agent/: current canonical project state
+Memory  = .agent/memory/: evidence-backed knowledge and explicit uncertainty
+History = .agent/sessions/ and .agent/archive/: what happened before
+Git     = objective working-tree and commit evidence
+```
 
-1. Read `.ai/index.md`.
-2. Read `.ai/current.md`.
-3. Read only the context documents relevant to the current task.
-4. Run or inspect:
-   - `git status`
-   - recent Git history
-   - existing uncommitted changes
-5. Check whether an active task file already exists (ignore `*-template.md`).
+The `.ai/` tree is retained only for V1 migration. Do not maintain parallel V2
+state there. See `docs/migration-v1-to-v2.md`.
 
-Do not begin with a full-repository exploration unless the indexed context is missing, stale, or demonstrably insufficient.
+## 2. Canonical Source Priority
 
-## 2. Source of Truth
+When project information conflicts, use this order:
 
-When information conflicts, use this priority:
+1. Current code, tests, and Git state
+2. Canonical project state in `.agent/`
+3. Verified facts in `.agent/memory/FACTS.md`
+4. Accepted decisions in `.agent/decisions/`
+5. Current `.agent/HANDOFF.md`
+6. Recent structured session summaries
+7. Archived session history
+8. Agent-native memory or previous chat
 
-1. Current explicit user requirements
-2. Current executable code behavior
-3. Tests and verified runtime evidence
-4. Accepted ADRs in `.ai/decisions/`
-5. `.ai/architecture.md`
-6. `.ai/context.md`
-7. `.ai/current.md`
-8. Handoffs / changelog
-9. Previous chat history
+Never let remembered context override repository evidence. Report unresolved
+conflicts rather than silently choosing a convenient version.
 
-Do not treat assumptions, old experiments, or chat statements as current facts without verification.
+## 3. Session Start Rules
 
-## 3. Scope Discipline
+- First entry: follow `.agents/skills/context-bootstrap/SKILL.md`.
+- Continuing work: follow `.agents/skills/context-resume/SKILL.md`.
+- Read `CURRENT_TASK.md` and `HANDOFF.md` before broad exploration.
+- Inspect branch, recent commits, working-tree status, and relevant diffs.
+- Do not load all source files, sessions, or archive entries by default.
+- Check for uncommitted work and preserve changes from other sessions.
 
-Before editing:
+## 4. During Work Rules
 
-- Identify the active task.
-- Identify in-scope files.
-- Identify out-of-scope areas.
-- Check for uncommitted changes from another session.
+- Keep scope tied to the current task; do not silently refactor unrelated code.
+- Prefer executable evidence over prose and label unverified claims.
+- Record architecture/interface/dependency/data-format decisions using the
+  `record-decision` Skill. Do not silently rewrite accepted history.
+- Store stable verified claims as Facts with evidence. Keep uncertain claims as
+  Hypotheses with a validation plan. A verified hypothesis creates a separate
+  Fact; retain the hypothesis history.
+- Keep discoveries separate until they merit a Fact or Decision.
+- Run relevant tests or checks before calling work complete.
 
-Do not silently refactor unrelated modules.
+## 5. Session End Rules
 
-Do not overwrite another agent's work merely to make the code match your preferred style.
+For meaningful unfinished work, follow the `session-handoff` Skill:
 
-## 4. Decision Discipline
+- reconcile task state with Git and tests;
+- update `CURRENT_TASK.md` and `HANDOFF.md`;
+- preserve failed attempts and concrete evidence;
+- create a structured session summary, never a chat transcript;
+- update decisions or memory only when their standards are met.
 
-Before changing architecture, interfaces, dependencies, storage formats, public APIs, deployment assumptions, or core algorithms:
+## 6. History and Compaction
 
-1. Search `.ai/decisions/`.
-2. Determine whether an existing ADR governs the choice.
-3. If reversing an accepted decision, document:
-   - why the old assumptions changed;
-   - migration impact;
-   - compatibility impact.
+- Recent summaries live in `.agent/sessions/`; old summaries live in
+  `.agent/archive/` and are not default context.
+- Compaction means extracting knowledge into canonical state/memory before
+  archiving. It must not concatenate history into an ever-growing summary.
+- Never promote a hypothesis, delete unique evidence, overwrite unfinished
+  state, or modify product code during compaction.
 
-Important decisions belong in ADRs, not only in chat.
+## 7. Safety Rules
 
-## 5. Work State
+- Never store credentials, tokens, passwords, private keys, `.env` values, or
+  other secrets in context files.
+- If a diff appears to contain a secret, omit the value and report only that
+  sensitive content was detected.
+- Do not overwrite user or other-agent changes to match preferred style.
+- Do not run destructive operations without explicit authorization and verified
+  targets.
 
-Use `.ai/current.md` for the latest global working state.
+## 8. Validation
 
-Use `.ai/tasks/TASK-NNN-short-title.md` for task-specific state.
+Use these entry points before completion:
 
-Copy skeletons from `.ai/templates/`. Files named `*-template.md` are not active work.
-
-`current.md` must remain concise and should answer:
-
-- What are we doing now?
-- What is blocked?
-- What changed recently?
-- What should happen next?
-
-## 6. Validation
-
-Before claiming completion:
-
-- Run relevant tests, checks, builds, or evaluation commands when available.
-- Distinguish verified results from assumptions.
-- Record important validation evidence in the active task or handoff.
-- Never mark a task Done solely because code was written.
-
-## 7. Session Handoff
-
-At the end of a meaningful work session:
-
-1. Update the active task status.
-2. Update `.ai/current.md` if global state changed.
-3. Append meaningful changes to `.ai/changelog.md`.
-4. Create/update a handoff when unfinished work remains.
-5. Add an ADR only when a durable technical decision was made.
-
-Do not update every context file mechanically.
-
-## 8. Context Hygiene
-
-Keep repository memory useful:
-
-- Stable facts → `context.md`
-- Current system design → `architecture.md`
-- Durable decisions → `decisions/`
-- Current global state → `current.md`
-- Task execution → `tasks/`
-- Cross-session continuation → `handoffs/`
-- Historical summary → `changelog.md`
-
-Remove or archive stale active information rather than letting contradictory states accumulate.
-
-## 9. Communication
-
-When starting from a fresh session, summarize before major changes:
-
-- understood goal;
-- current state;
-- relevant constraints;
-- files likely involved;
-- risks or conflicts discovered.
-
-For small, obvious tasks, keep this brief.
+```bash
+python scripts/validate_context.py
+python scripts/context_status.py
+python -m unittest discover -s tests -v
+```

@@ -1,4 +1,7 @@
-# AI Context Index
+# V1 AI Context Index
+
+> Compatibility reference only. V2 agents start at `../AGENTS.md` and use
+> `../.agent/` as canonical state. See `../docs/migration-v1-to-v2.md`.
 
 This file is the navigation map for project context.
 

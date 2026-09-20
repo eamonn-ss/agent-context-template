@@ -1,246 +1,174 @@
-# AI Project Context Template
+# agent-context-template
 
-一个面向 Cursor、Codex、Claude Code、Copilot 以及其他 AI Coding Agent 的通用项目级上下文模板。
+`agent-context-template` is a vendor-neutral project context lifecycle protocol
+for persistent state, session handoff, project memory, and context recovery
+across AI coding agents such as Codex, Cursor, and Claude Code.
 
-核心原则：
+Chat sessions are temporary. The repository is durable context. Git, code, and
+tests are verifiable evidence.
 
-> Chat Session 是临时上下文；Repository 是长期上下文；Git 是事实历史；代码与测试是最终事实来源。
+## Problem
 
-## 目标
+New sessions repeatedly explore the same project, tools lose decisions and failed
+attempts, assumptions slowly become “facts,” and growing transcripts waste tokens.
+Native agent memory also cannot be the sole source for shared project truth.
 
-该模板解决以下问题：
+## Core Idea
 
-- 新开 Agent / Chat 后需要重新探索整个项目
-- 不同窗口不知道彼此做过什么
-- 多个 Agent 对架构、接口或技术路线产生冲突
-- 长会话压缩后遗漏关键决策
-- 项目上下文文件越来越长，导致 token 浪费
-- AI 把旧实验、旧假设误认为当前事实
-- AI 修改代码后没有留下可供下一 Session 使用的交接信息
+```text
+Rules   tell agents what to respect
+Skills  define how context operations run
+State   says what is true now
+Memory  separates facts, hypotheses, and discoveries
+History records structured past work
+Git     supplies objective evidence
+```
 
-## 快速开始
+## Architecture
 
-在本仓库根目录执行初始化脚本（推荐，支持目标项目已有空/半空 `.ai/`）：
+```text
+AGENTS.md                          Rules and source priority
+.agents/skills/                    Vendor-neutral operations
+.agent/*.md                        Canonical state
+.agent/memory/                     Long-lived knowledge
+.agent/sessions/ -> archive/       Bounded structured history
+scripts/                           Deterministic evidence and validation
+integrations/                      Thin vendor adapters
+```
+
+V2 uses `.agent/` as its only writable canonical state. The old `.ai/` tree is
+retained for safe V1 migration, not parallel state maintenance.
+
+## Quick Start
 
 ```bash
-./scripts/init-ai-context.sh /path/to/your-project
+./scripts/init-ai-context.sh /path/to/project
+cd /path/to/project
+python scripts/validate_context.py
 ```
 
-或从本仓库根目录手动复制：
+Customize `.agent/PROJECT.md`, `ARCHITECTURE.md`, `CURRENT_TASK.md`, and
+`HANDOFF.md`, then ask your agent to run `context-bootstrap`.
+
+## Context Lifecycle
+
+1. `context-bootstrap` loads the minimum context on first entry.
+2. Normal work records evidence-backed Facts and durable Decisions when needed.
+3. `session-handoff` reconciles state with Git and preserves failed attempts.
+4. `context-resume` verifies the handoff and continues in another session/tool.
+5. `context-compact` extracts knowledge before archiving eligible old sessions.
+
+The archive is never loaded by default.
+
+## Skills
+
+| Skill | Use |
+|---|---|
+| `context-bootstrap` | First entry with minimum context |
+| `context-resume` | Continue verified unfinished work |
+| `session-handoff` | Transfer state across sessions or tools |
+| `record-decision` | Add or supersede a durable decision |
+| `context-compact` | Extract knowledge and archive safe history |
+| `project-status` | Answer “where is this project now?” |
+
+Skills live under `.agents/skills/` and contain procedures, never project facts.
+
+## Directory Structure
+
+```text
+.
+├── AGENTS.md
+├── .agents/skills/
+├── .agent/
+│   ├── PROJECT.md
+│   ├── ARCHITECTURE.md
+│   ├── CURRENT_TASK.md
+│   ├── DECISIONS.md
+│   ├── HANDOFF.md
+│   ├── TODO.md
+│   ├── decisions/
+│   ├── memory/
+│   ├── sessions/
+│   └── archive/
+├── scripts/
+├── templates/
+├── integrations/
+├── docs/
+└── tests/
+```
+
+## Cursor Usage
+
+Keep `.cursor/rules/ai-context.mdc` enabled, then ask Cursor to follow the desired
+Skill. The rule points to the shared protocol instead of duplicating it. Details:
+[`integrations/cursor/README.md`](integrations/cursor/README.md).
+
+## Codex Usage
+
+Open the repository root so Codex sees `AGENTS.md` and project Skills. Invoke
+`context-bootstrap`, `context-resume`, or `session-handoff` as appropriate.
+Details: [`integrations/codex/README.md`](integrations/codex/README.md).
+
+## Claude Usage
+
+Tell Claude or Claude Code to use `AGENTS.md` and the selected Skill as the shared
+protocol. Any Claude-specific instruction should remain a thin pointer. Details:
+[`integrations/claude/README.md`](integrations/claude/README.md).
+
+## Example Workflow
+
+```text
+Session A / Cursor
+  context-bootstrap -> development -> record-decision -> session-handoff
+                                                        |
+Session B / Codex                                      v
+  context-resume <- handoff + Git verification -> development -> handoff
+                                                               |
+Session C / Claude                                            v
+  context-resume <- canonical state + handoff + Git evidence
+```
+
+The transfer is cross-session, cross-agent, and cross-tool because shared
+repository files—not a vendor chat—carry the state.
+
+## Automation
 
 ```bash
-cp -r .ai /path/to/your-project/
-cp AGENTS.md /path/to/your-project/
-mkdir -p /path/to/your-project/.cursor/rules
-cp .cursor/rules/ai-context.mdc /path/to/your-project/.cursor/rules/
-cp .cursorignore.example /path/to/your-project/
-mkdir -p /path/to/your-project/scripts
-cp scripts/check-context.sh /path/to/your-project/scripts/
+python scripts/collect_git_state.py --json
+python scripts/context_status.py
+python scripts/validate_context.py
+python scripts/compact_sessions.py          # dry run
+python scripts/compact_sessions.py --apply  # explicit Ready sessions only
+python -m unittest discover -s tests -v
 ```
 
-随后编辑目标项目中的：
+Tools use Python 3.10+ standard library only and handle missing Git/context files
+without tracebacks. Validator warnings do not fail; blocking errors return 1.
 
-```text
-.ai/context.md
-.ai/architecture.md
-.ai/current.md
-```
+## Design Principles
 
-并运行：
+- Load minimum required context first; retrieve deeper history only when needed.
+- Prefer code, tests, and Git over prose or remembered context.
+- Facts require evidence; hypotheses retain explicit uncertainty.
+- Replace current state, append structured history, supersede decisions.
+- Never store credentials or copy suspected secrets into handoffs.
+- Keep core protocol vendor-neutral and integrations thin.
 
-```bash
-./scripts/check-context.sh
-```
+See [`docs/protocol.md`](docs/protocol.md) for the complete lifecycle and
+[`docs/design-principles.md`](docs/design-principles.md) for the compact rationale.
 
-首次进入新 Agent 时只需：
+## Migration
 
-```text
-Read AGENTS.md and restore project context before making changes.
-```
+Existing V1 repositories can keep `.ai/` while adopting V2, then stop writing V1
+state after verification. The exact mapping and safe sequence are in
+[`docs/migration-v1-to-v2.md`](docs/migration-v1-to-v2.md).
 
-## 上下文分层
+## Roadmap
 
-```text
-L0 Agent Protocol
-   AGENTS.md
-        ↓
-L1 Navigation
-   .ai/index.md
-        ↓
-L2 Stable Context
-   context.md
-   architecture.md
-        ↓
-L3 Decisions
-   decisions/
-        ↓
-L4 Active State
-   current.md
-   tasks/
-        ↓
-L5 Session History
-   handoffs/
-   changelog.md
-        ↓
-Code / Tests / Git
-```
+- V2.1: optional ripgrep retrieval and SQLite FTS.
+- V2.2: optional semantic retrieval, embeddings, and vector storage.
+- V3: optional MCP context server (`get_project_context`, decision/history
+  search, memory recording, and handoff creation).
 
-文件骨架（task / ADR / handoff）位于 `.ai/templates/`，不要放进 `tasks/`、`decisions/`、`handoffs/` 活跃目录。
-
-## Source of Truth
-
-出现冲突时，按以下顺序判断：
-
-1. 用户当前明确要求
-2. 当前代码行为
-3. 自动化测试 / 验收结果
-4. 已接受 ADR
-5. `.ai/architecture.md`
-6. `.ai/context.md`
-7. `.ai/current.md`
-8. Handoff / Changelog
-9. Chat history
-
-注意：聊天记录不是项目事实的最终来源。
-
-## 推荐使用方式
-
-### 开始 Session
-
-Agent 应：
-
-1. 阅读 `AGENTS.md`
-2. 阅读 `.ai/index.md`
-3. 阅读 `.ai/current.md`
-4. 按任务需要读取 architecture / ADR / task
-5. 执行 `git status`
-6. 查看最近 Git history
-7. 检查未提交修改
-8. 再开始工作
-
-### 工作过程中
-
-- 一个任务对应一个 Task 文件（从 `.ai/templates/TASK-000-template.md` 复制）
-- 重要设计变化写 ADR
-- 不把临时推理全部写入 context
-- 不静默覆盖其他 Agent 的未提交修改
-- 不为了“同步文档”而机械更新所有文件
-
-### Session 结束
-
-更新：
-
-- 当前任务状态
-- 必要的 changelog
-- handoff
-- 若发生架构决策，新增/更新 ADR
-
-## 设计原则
-
-### 1. Stable / Active 分离
-
-稳定信息和当前状态必须分开。
-
-### 2. Index First
-
-Agent 不应每次读取 `.ai/` 下全部文件，而应从 `.ai/index.md` 导航。
-
-### 3. Append History, Replace State
-
-- `changelog.md`：追加历史
-- `handoffs/`：保存交接
-- `current.md`：直接覆盖为当前最新状态
-
-### 4. Decision ≠ Discussion
-
-只有已经形成影响后续工作的技术决定才进入 ADR。
-
-### 5. Context Budget
-
-上下文文件应保持短小：
-
-- AGENTS.md：尽量 < 150 行
-- index.md：尽量 < 100 行
-- current.md：尽量 < 120 行
-- context.md：只保留长期稳定事实
-- architecture.md：只记录当前架构，不记录历史讨论
-
-详细历史应进入 Git、ADR、handoff 或 docs。
-
-## 推荐 Git 策略
-
-多 Agent 并行时：
-
-```text
-main
-├── feat/TASK-001-camera
-├── feat/TASK-002-inspection
-└── fix/TASK-003-threshold
-```
-
-尽量避免多个 Agent 同时修改同一个高冲突文件。
-
-## Chat Session 提示词
-
-完整 checklist 见：
-
-- `.ai/templates/session-start.md`
-- `.ai/templates/session-end.md`
-
-### 新窗口启动
-
-```text
-Read AGENTS.md and restore project context.
-
-Before making changes:
-1. Read .ai/index.md
-2. Read .ai/current.md
-3. Read only task-relevant architecture, ADRs, and task files
-4. Inspect git status, recent history, and uncommitted changes
-5. Do not modify code yet
-
-Then briefly summarize:
-- project goal relevant to this task
-- active task and status (or None)
-- governing constraints / ADRs
-- uncommitted changes or conflicts
-- files likely involved
-- recommended next action
-
-Then continue the requested task.
-```
-
-### Session 结束
-
-```text
-Before finishing this session:
-1. Verify with relevant tests/checks where possible
-2. Update the active task file under .ai/tasks/ (verified results + next action)
-3. Update .ai/current.md only if global project state changed
-4. Append meaningful changes to .ai/changelog.md
-5. Create/update a handoff under .ai/handoffs/ if work must continue elsewhere
-6. Add or supersede an ADR under .ai/decisions/ only if a durable decision changed
-7. Do not mechanically rewrite stable context files
-
-Keep documents concise. Do not duplicate information already recorded elsewhere.
-```
-
-## 与工具集成
-
-### Cursor
-
-核心上下文放在 `AGENTS.md + .ai/`。
-
-`.cursor/rules/ai-context.mdc` 仅负责提醒 Cursor 遵循该协议。
-
-### Codex
-
-以仓库根目录 `AGENTS.md` 作为统一入口。
-
-### 其他 Agent
-
-即使不自动识别 `AGENTS.md`，也只需在新会话中输入：
-
-```text
-Read AGENTS.md before working on this repository.
-```
+These are deliberately absent from V2, which requires only Markdown, Git,
+Skills, Python scripts, and the protocol.

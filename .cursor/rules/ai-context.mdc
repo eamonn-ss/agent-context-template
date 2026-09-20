@@ -3,14 +3,15 @@ description: Follow the repository-level AI context protocol
 alwaysApply: true
 ---
 
-Before non-trivial work, read `AGENTS.md` and follow its context restoration protocol.
+Before non-trivial work, read `AGENTS.md` and follow its context lifecycle protocol.
 
-Use `.ai/index.md` to navigate project memory.
+Use `.agent/CURRENT_TASK.md` and `.agent/HANDOFF.md` before broad exploration.
+Follow the relevant procedure under `.agents/skills/`.
 
 Do not assume the current Cursor chat contains the full project state.
 
-Do not treat `*-template.md` under `.ai/templates/` (or elsewhere) as an active task, ADR, or handoff.
+Do not treat files under `templates/` or the legacy `.ai/` tree as canonical V2 state.
 
 Before modifying files, inspect existing Git working-tree changes and avoid silently overwriting work from other sessions.
 
-After meaningful unfinished work, leave enough task/handoff state for another Agent to continue without relying on this chat.
+After meaningful unfinished work, update canonical task/handoff state and a structured session summary so another Agent can continue without this chat.

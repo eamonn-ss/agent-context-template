@@ -1,0 +1,25 @@
+# Project
+
+## Name
+
+<PROJECT_NAME>
+
+## Purpose
+
+<ONE_PARAGRAPH_PURPOSE>
+
+## Users
+
+- <PRIMARY_USER>
+
+## Goals
+
+- <VERIFIABLE_GOAL>
+
+## Non-goals
+
+- <EXPLICIT_NON_GOAL>
+
+## Runtime
+
+<SUPPORTED_ENVIRONMENTS_AND_REQUIRED_TOOLS>

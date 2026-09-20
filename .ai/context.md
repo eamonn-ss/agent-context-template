@@ -1,4 +1,6 @@
-# Project Context
+# V1 Project Context
+
+> Compatibility reference only. Current V2 project state lives in `.agent/`.
 
 > Stable facts only. Do not put daily progress here.
 >
