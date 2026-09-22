@@ -1,174 +1,181 @@
+<p align="center">
+  <strong>English</strong> |
+  <a href="./README.zh-CN.md">简体中文</a>
+</p>
+
 # agent-context-template
 
-`agent-context-template` is a vendor-neutral project context lifecycle protocol
-for persistent state, session handoff, project memory, and context recovery
-across AI coding agents such as Codex, Cursor, and Claude Code.
+## 1. Project Introduction
 
-Chat sessions are temporary. The repository is durable context. Git, code, and
-tests are verifiable evidence.
+`agent-context-template` is a vendor-neutral lifecycle protocol for durable
+project state, evidence-backed memory, session handoff, and recovery across
+Codex, Cursor, Claude Code, and other coding agents. It requires only Markdown
+and Python 3.10+; Git is useful evidence but remains optional.
 
-## Problem
+## 2. Problem
 
-New sessions repeatedly explore the same project, tools lose decisions and failed
-attempts, assumptions slowly become “facts,” and growing transcripts waste tokens.
-Native agent memory also cannot be the sole source for shared project truth.
+Chats expire and assumptions drift. Earlier layouts also placed framework
+`docs/`, `scripts/`, and `tests/` beside identically named business directories,
+making an otherwise useful context system invasive in real repositories.
 
-## Core Idea
-
-```text
-Rules   tell agents what to respect
-Skills  define how context operations run
-State   says what is true now
-Memory  separates facts, hypotheses, and discoveries
-History records structured past work
-Git     supplies objective evidence
-```
-
-## Architecture
+## 3. Core Idea
 
 ```text
-AGENTS.md                          Rules and source priority
-.agents/skills/                    Vendor-neutral operations
-.agent/*.md                        Canonical state
-.agent/memory/                     Long-lived knowledge
-.agent/sessions/ -> archive/       Bounded structured history
-scripts/                           Deterministic evidence and validation
-integrations/                      Thin vendor adapters
+Rules           AGENTS.md
+Discovery       .agents/skills/
+Context Root    .agent-context/
+Canonical State .agent-context/state/
+Evidence        application code, tests, and optional Git
 ```
 
-V2 uses `.agent/` as its only writable canonical state. The old `.ai/` tree is
-retained for safe V1 migration, not parallel state maintenance.
+Repository evidence outranks canonical prose; canonical state outranks memory,
+handoffs, history, and agent-native memory.
 
-## Quick Start
+## 4. Architecture
+
+`.agents/` contains agent-discoverable capabilities only. `.agent-context/`
+contains Context System state, memory, history, tooling, templates, docs,
+integrations, and framework tests. This is the V2.2 boundary established by
+DEC-0003.
+
+## 5. Quick Start
+
+Preview or install the embedded profile:
 
 ```bash
-./scripts/init-ai-context.sh /path/to/project
-cd /path/to/project
-python scripts/validate_context.py
+.agent-context/scripts/init-ai-context.sh --dry-run /path/to/project
+.agent-context/scripts/init-ai-context.sh /path/to/project
 ```
 
-Customize `.agent/PROJECT.md`, `ARCHITECTURE.md`, `CURRENT_TASK.md`, and
-`HANDOFF.md`, then ask your agent to run `context-bootstrap`.
+The installed project keeps its existing application layout:
 
-## Context Lifecycle
+```text
+your-project/
+├── src/
+├── docs/                  # your business docs
+├── scripts/               # your business scripts
+├── tests/                 # your business tests
+├── .agents/
+│   └── skills/
+└── .agent-context/
+    ├── state/
+    ├── memory/
+    ├── sessions/
+    ├── archive/
+    └── scripts/
+```
 
-1. `context-bootstrap` loads the minimum context on first entry.
-2. Normal work records evidence-backed Facts and durable Decisions when needed.
-3. `session-handoff` reconciles state with Git and preserves failed attempts.
-4. `context-resume` verifies the handoff and continues in another session/tool.
-5. `context-compact` extracts knowledge before archiving eligible old sessions.
+Run `/project-init` once, `/context-start` at each new session, and
+`/session-handoff` before ending meaningful unfinished work.
 
-The archive is never loaded by default.
+## 6. Context Lifecycle
 
-## Skills
+`context-start` routes to `INIT_REQUIRED`, `BOOTSTRAP`, or `RESUME`. Bootstrap
+loads a project view; resume continues an active task from canonical state and a
+usable handoff. Facts require evidence, Decisions preserve rationale, and
+compaction extracts durable knowledge before archiving history.
 
-| Skill | Use |
+## 7. Skills
+
+| Skill | Purpose |
 |---|---|
-| `context-bootstrap` | First entry with minimum context |
-| `context-resume` | Continue verified unfinished work |
-| `session-handoff` | Transfer state across sessions or tools |
+| `project-init` | Initialize Project and Architecture on first adoption |
+| `context-start` | Select initialization, bootstrap, or resume |
+| `context-bootstrap` | Load a project-oriented view |
+| `context-resume` | Continue an unfinished task |
+| `session-handoff` | Transfer verified work across sessions/tools |
 | `record-decision` | Add or supersede a durable decision |
-| `context-compact` | Extract knowledge and archive safe history |
-| `project-status` | Answer “where is this project now?” |
+| `context-compact` | Extract knowledge and archive eligible summaries |
+| `project-status` | Report current canonical and Git evidence |
 
-Skills live under `.agents/skills/` and contain procedures, never project facts.
+## 8. Namespace Isolation
 
-## Directory Structure
+Your project keeps its own `docs/`, `scripts/`, `tests/`, `templates/`, and
+`integrations/`. Agent Context stays isolated in `.agent-context/`; the only
+separate framework directory is `.agents/skills/`, retained for agent discovery.
+Do not treat framework implementation as application source code.
+
+## 9. Non-invasive Installation
+
+The installer never overwrites existing files, modifies application source, or
+writes framework assets into generic business directories. Existing `AGENTS.md`
+is skipped. It reports an installed version, detects explicit V2.1 `.agent/`
+markers, and supports a no-write `--dry-run` preview.
+
+## 10. Development vs Embedded Profile
+
+`--profile embedded` is the default and installs lifecycle Skills, state
+scaffolds, runtime scripts, required templates, metadata, and thin optional
+configuration. `--profile development` additionally installs framework docs,
+integrations, and tests—but still inside `.agent-context/`.
+
+## 11. Directory Structure
+
+The template repository uses the complete development layout:
 
 ```text
 .
 ├── AGENTS.md
 ├── .agents/skills/
-├── .agent/
-│   ├── PROJECT.md
-│   ├── ARCHITECTURE.md
-│   ├── CURRENT_TASK.md
-│   ├── DECISIONS.md
-│   ├── HANDOFF.md
-│   ├── TODO.md
-│   ├── decisions/
-│   ├── memory/
-│   ├── sessions/
-│   └── archive/
-├── scripts/
-├── templates/
-├── integrations/
-├── docs/
-└── tests/
+└── .agent-context/
+    ├── VERSION
+    ├── state/        ├── memory/       ├── decisions/
+    ├── sessions/     ├── archive/      ├── scripts/
+    ├── templates/    ├── docs/         ├── integrations/
+    └── tests/
 ```
 
-## Cursor Usage
+The legacy `.ai/` tree remains only as V1 migration evidence.
 
-Keep `.cursor/rules/ai-context.mdc` enabled, then ask Cursor to follow the desired
-Skill. The rule points to the shared protocol instead of duplicating it. Details:
-[`integrations/cursor/README.md`](integrations/cursor/README.md).
+## 12. Context Root Discovery
 
-## Codex Usage
+Python tools walk upward from the current directory to find `.agent-context/`.
+They can therefore run from `src/module/` without assuming the shell is at the
+repository root. `context_paths.py` centralizes Context, state, memory, session,
+and archive paths.
 
-Open the repository root so Codex sees `AGENTS.md` and project Skills. Invoke
-`context-bootstrap`, `context-resume`, or `session-handoff` as appropriate.
-Details: [`integrations/codex/README.md`](integrations/codex/README.md).
+## 13. V2.1 Migration
 
-## Claude Usage
-
-Tell Claude or Claude Code to use `AGENTS.md` and the selected Skill as the shared
-protocol. Any Claude-specific instruction should remain a thin pointer. Details:
-[`integrations/claude/README.md`](integrations/claude/README.md).
-
-## Example Workflow
-
-```text
-Session A / Cursor
-  context-bootstrap -> development -> record-decision -> session-handoff
-                                                        |
-Session B / Codex                                      v
-  context-resume <- handoff + Git verification -> development -> handoff
-                                                               |
-Session C / Claude                                            v
-  context-resume <- canonical state + handoff + Git evidence
-```
-
-The transfer is cross-session, cross-agent, and cross-tool because shared
-repository files—not a vendor chat—carry the state.
-
-## Automation
+V2.1 `.agent/` state is detected but never dual-written. Preview and apply the
+guarded one-time migration:
 
 ```bash
-python scripts/collect_git_state.py --json
-python scripts/context_status.py
-python scripts/validate_context.py
-python scripts/compact_sessions.py          # dry run
-python scripts/compact_sessions.py --apply  # explicit Ready sessions only
-python -m unittest discover -s tests -v
+python .agent-context/scripts/migrate_v21_to_v22.py --dry-run
+python .agent-context/scripts/migrate_v21_to_v22.py
 ```
 
-Tools use Python 3.10+ standard library only and handle missing Git/context files
-without tracebacks. Validator warnings do not fail; blocking errors return 1.
+Different destination content is a blocking conflict. See
+[`migration-v2.1-to-v2.2.md`](.agent-context/docs/migration-v2.1-to-v2.2.md).
 
-## Design Principles
+## 14. Vendor Integrations
 
-- Load minimum required context first; retrieve deeper history only when needed.
-- Prefer code, tests, and Git over prose or remembered context.
-- Facts require evidence; hypotheses retain explicit uncertainty.
-- Replace current state, append structured history, supersede decisions.
-- Never store credentials or copy suspected secrets into handoffs.
-- Keep core protocol vendor-neutral and integrations thin.
+Cursor, Codex, and Claude use root `AGENTS.md` plus `.agents/skills/`; integration
+notes are thin adapters under
+[`.agent-context/integrations/`](.agent-context/integrations/). Canonical state
+never moves into vendor-native memory.
 
-See [`docs/protocol.md`](docs/protocol.md) for the complete lifecycle and
-[`docs/design-principles.md`](docs/design-principles.md) for the compact rationale.
+## 15. Validation / Testing
 
-## Migration
+```bash
+python .agent-context/scripts/context_start.py
+python .agent-context/scripts/context_status.py
+python .agent-context/scripts/validate_context.py
+python .agent-context/scripts/compact_sessions.py
+python -m unittest discover -s .agent-context/tests -v
+```
 
-Existing V1 repositories can keep `.ai/` while adopting V2, then stop writing V1
-state after verification. The exact mapping and safe sequence are in
-[`docs/migration-v1-to-v2.md`](docs/migration-v1-to-v2.md).
+No-Git projects remain supported and are reported as lacking Git evidence rather
+than failing. Validator warnings do not fail; blocking errors return non-zero.
 
-## Roadmap
+## 16. Roadmap
 
-- V2.1: optional ripgrep retrieval and SQLite FTS.
-- V2.2: optional semantic retrieval, embeddings, and vector storage.
-- V3: optional MCP context server (`get_project_context`, decision/history
-  search, memory recording, and handoff creation).
+- V2.0: context lifecycle foundation.
+- V2.1: first-run initialization, `context-start`, and bilingual documentation.
+- V2.2: namespace isolation and non-invasive installation.
+- V2.3: context freshness and state-drift detection.
+- V2.4: optional local search/retrieval.
+- V3: optional MCP Context Server.
 
-These are deliberately absent from V2, which requires only Markdown, Git,
-Skills, Python scripts, and the protocol.
+See the full [protocol](.agent-context/docs/protocol.md),
+[design principles](.agent-context/docs/design-principles.md), and
+[V1 migration guide](.agent-context/docs/migration-v1-to-v2.md).

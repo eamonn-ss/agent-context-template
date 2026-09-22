@@ -5,12 +5,16 @@ alwaysApply: true
 
 Before non-trivial work, read `AGENTS.md` and follow its context lifecycle protocol.
 
-Use `.agent/CURRENT_TASK.md` and `.agent/HANDOFF.md` before broad exploration.
-Follow the relevant procedure under `.agents/skills/`.
+Use `project-init` when canonical Project or Architecture state is still
+templated. Otherwise use `context-start` as the default session entry and follow
+the mode it selects.
 
 Do not assume the current Cursor chat contains the full project state.
 
-Do not treat files under `templates/` or the legacy `.ai/` tree as canonical V2 state.
+Do not treat files under `.agent-context/templates/` or the legacy `.ai/` tree
+as canonical V2 state. Canonical state is under `.agent-context/state/`.
+
+Exclude `.agent-context/` and `.agents/` when exploring application architecture.
 
 Before modifying files, inspect existing Git working-tree changes and avoid silently overwriting work from other sessions.
 

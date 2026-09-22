@@ -2,31 +2,36 @@
 
 This is the vendor-neutral entry point for AI coding agents in this repository.
 User requirements govern scope; the priority below governs claims about project
-state. V2 canonical state lives under `.agent/`.
+state. V2.2 canonical state lives under `.agent-context/state/`.
 
 ## 1. Context Protocol
 
 ```text
 Rules   = this file: durable behavior
 Skills  = .agents/skills/: how to perform context operations
-State   = .agent/: current canonical project state
-Memory  = .agent/memory/: evidence-backed knowledge and explicit uncertainty
-History = .agent/sessions/ and .agent/archive/: what happened before
+State   = .agent-context/state/: current canonical project state
+Memory  = .agent-context/memory/: evidence-backed knowledge and uncertainty
+History = .agent-context/sessions/ and archive/: what happened before
 Git     = objective working-tree and commit evidence
 ```
 
 The `.ai/` tree is retained only for V1 migration. Do not maintain parallel V2
-state there. See `docs/migration-v1-to-v2.md`.
+state there. See `.agent-context/docs/migration-v1-to-v2.md`.
+
+`.agents/` contains Agent Skills only. `.agent-context/` owns canonical state,
+memory, history, tooling, framework docs, templates, integrations, and tests.
+Do not treat `.agent-context/` implementation files as application source, and
+do not move business `docs/`, `scripts/`, or `tests/` into it.
 
 ## 2. Canonical Source Priority
 
 When project information conflicts, use this order:
 
 1. Current code, tests, and Git state
-2. Canonical project state in `.agent/`
-3. Verified facts in `.agent/memory/FACTS.md`
-4. Accepted decisions in `.agent/decisions/`
-5. Current `.agent/HANDOFF.md`
+2. Canonical project state in `.agent-context/state/`
+3. Verified facts in `.agent-context/memory/FACTS.md`
+4. Accepted decisions in `.agent-context/decisions/`
+5. Current `.agent-context/state/HANDOFF.md`
 6. Recent structured session summaries
 7. Archived session history
 8. Agent-native memory or previous chat
@@ -36,8 +41,12 @@ conflicts rather than silently choosing a convenient version.
 
 ## 3. Session Start Rules
 
-- First entry: follow `.agents/skills/context-bootstrap/SKILL.md`.
-- Continuing work: follow `.agents/skills/context-resume/SKILL.md`.
+- If canonical Project or Architecture state is missing or still templated,
+  follow `.agents/skills/project-init/SKILL.md`.
+- Otherwise prefer `.agents/skills/context-start/SKILL.md` for every new
+  session; it routes automatically to project bootstrap or task resume.
+- Use `context-resume` explicitly only when task continuation is intentionally
+  forced. Use `context-bootstrap` explicitly for project-level orientation.
 - Read `CURRENT_TASK.md` and `HANDOFF.md` before broad exploration.
 - Inspect branch, recent commits, working-tree status, and relevant diffs.
 - Do not load all source files, sessions, or archive entries by default.
@@ -67,8 +76,8 @@ For meaningful unfinished work, follow the `session-handoff` Skill:
 
 ## 6. History and Compaction
 
-- Recent summaries live in `.agent/sessions/`; old summaries live in
-  `.agent/archive/` and are not default context.
+- Recent summaries live in `.agent-context/sessions/`; old summaries live in
+  `.agent-context/archive/` and are not default context.
 - Compaction means extracting knowledge into canonical state/memory before
   archiving. It must not concatenate history into an ever-growing summary.
 - Never promote a hypothesis, delete unique evidence, overwrite unfinished
@@ -89,7 +98,7 @@ For meaningful unfinished work, follow the `session-handoff` Skill:
 Use these entry points before completion:
 
 ```bash
-python scripts/validate_context.py
-python scripts/context_status.py
-python -m unittest discover -s tests -v
+python .agent-context/scripts/validate_context.py
+python .agent-context/scripts/context_status.py
+python -m unittest discover -s .agent-context/tests -v
 ```

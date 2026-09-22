@@ -10,7 +10,8 @@ context is becoming unreliable.
 
 ## Evidence First
 
-Inspect `.agent/CURRENT_TASK.md`, `.agent/DECISIONS.md`, and the relevant records.
+Inspect `.agent-context/state/CURRENT_TASK.md`,
+`.agent-context/state/DECISIONS.md`, and the relevant records.
 Collect `git status --short`, `git diff --stat`, `git diff`, and
 `git log --oneline -5`. Summarize diffs; never paste suspected credentials,
 tokens, private keys, `.env` values, or other secrets. Instead write:
@@ -19,12 +20,12 @@ tokens, private keys, `.env` values, or other secrets. Instead write:
 
 ## Write
 
-Update `.agent/HANDOFF.md` with Goal, Completed, Modified Files, Technical
+Update `.agent-context/state/HANDOFF.md` with Goal, Completed, Modified Files, Technical
 Decisions, Current Problem, Attempts Made, Failed Approaches, Important Evidence,
 Open Questions, Next Steps, and Suggested First Action. Preserve failed
 approaches even when none succeeded.
 
-Create one structured summary in `.agent/sessions/YYYY-MM-DD-NN.md` containing
+Create one structured summary in `.agent-context/sessions/YYYY-MM-DD-NN.md` containing
 Objective, Completed, Decisions, Files Changed, Problems, Failed Attempts,
 Discoveries, and Next Step. Do not copy chat transcripts.
 

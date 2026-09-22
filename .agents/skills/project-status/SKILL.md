@@ -5,16 +5,16 @@ description: Answer where a project currently stands using canonical task and ha
 
 # Project Status
 
-Run `python scripts/context_status.py` when available, then verify any surprising
+Run `python .agent-context/scripts/context_status.py` when available, then verify any surprising
 result against its source file.
 
 Read only:
 
-- `.agent/CURRENT_TASK.md` and `.agent/HANDOFF.md`
+- `.agent-context/state/CURRENT_TASK.md` and `.agent-context/state/HANDOFF.md`
 - current Git status
-- `.agent/DECISIONS.md`
-- open entries in `.agent/memory/HYPOTHESES.md`
-- `.agent/TODO.md`
+- `.agent-context/state/DECISIONS.md`
+- open entries in `.agent-context/memory/HYPOTHESES.md`
+- `.agent-context/state/TODO.md`
 - the newest relevant session summary when needed
 
 Do not load the complete archive. Report the current goal and status, blockers,
