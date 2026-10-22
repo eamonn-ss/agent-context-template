@@ -7,9 +7,7 @@ not duplicate them.
 - Discovery: instruct Claude to read `AGENTS.md` and the requested Skill under
   `.agents/skills/`.
 - First adoption: follow `project-init/SKILL.md`.
-- New session: follow `context-start/SKILL.md`.
-- Advanced explicit entry: use `context-bootstrap` for project orientation or
-  `context-resume` to force task continuation.
+- New session: follow `context-start/SKILL.md` and only its selected section.
 - Handoff: follow `session-handoff/SKILL.md`.
 
 Claude-specific hooks or commands are optional. They must preserve

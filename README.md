@@ -70,23 +70,19 @@ Run `/project-init` once, `/context-start` at each new session, and
 
 ## 6. Context Lifecycle
 
-`context-start` routes to `INIT_REQUIRED`, `BOOTSTRAP`, or `RESUME`. Bootstrap
-loads a project view; resume continues an active task from canonical state and a
-usable handoff. Facts require evidence, Decisions preserve rationale, and
-compaction extracts durable knowledge before archiving history.
+`context-start` routes to `INIT_REQUIRED`, `BOOTSTRAP`, or `RESUME` and carries
+the steps for each mode. Facts require evidence, Decisions preserve rationale,
+and compaction extracts durable knowledge before archiving history.
 
 ## 7. Skills
 
 | Skill | Purpose |
 |---|---|
 | `project-init` | Initialize Project and Architecture on first adoption |
-| `context-start` | Select initialization, bootstrap, or resume |
-| `context-bootstrap` | Load a project-oriented view |
-| `context-resume` | Continue an unfinished task |
+| `context-start` | Route a session and load only the matching view |
 | `session-handoff` | Transfer verified work across sessions/tools |
 | `record-decision` | Add or supersede a durable decision |
 | `context-compact` | Extract knowledge and archive eligible summaries |
-| `project-status` | Report current canonical and Git evidence |
 
 ## 8. Namespace Isolation
 

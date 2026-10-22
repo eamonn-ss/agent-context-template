@@ -68,8 +68,7 @@ your-project/
 
 ## 6. Context 生命周期
 
-`context-start` 路由到 `INIT_REQUIRED`、`BOOTSTRAP` 或 `RESUME`。Bootstrap
-加载项目视图；Resume 根据 canonical state 和有效 Handoff 继续 active task。
+`context-start` 路由到 `INIT_REQUIRED`、`BOOTSTRAP` 或 `RESUME`，并包含对应步骤。
 Fact 必须有 Evidence，Decision 保留理由，Compaction 提取持久知识后再归档。
 
 ## 7. Skills
@@ -77,13 +76,10 @@ Fact 必须有 Evidence，Decision 保留理由，Compaction 提取持久知识�
 | Skill | 用途 |
 |---|---|
 | `project-init` | 首次接入时初始化 Project 和 Architecture |
-| `context-start` | 选择 initialization、bootstrap 或 resume |
-| `context-bootstrap` | 加载项目视角 |
-| `context-resume` | 继续未完成任务 |
+| `context-start` | 路由会话并只加载对应视图 |
 | `session-handoff` | 跨 Session/工具移交已验证工作 |
 | `record-decision` | 新增或取代持久决策 |
 | `context-compact` | 提取知识并归档合格摘要 |
-| `project-status` | 报告 canonical state 与 Git 证据 |
 
 ## 8. Namespace Isolation
 

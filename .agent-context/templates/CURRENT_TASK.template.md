@@ -20,6 +20,10 @@ Ready
 
 None.
 
+## Done when
+
+<COMMAND_AND_OBSERVED_RESULT>
+
 ## Next Action
 
 <ONE_CONCRETE_ACTION>

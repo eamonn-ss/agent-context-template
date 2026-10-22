@@ -2,7 +2,8 @@
 
 This is the vendor-neutral entry point for AI coding agents in this repository.
 User requirements govern scope; the priority below governs claims about project
-state. V2.2 canonical state lives under `.agent-context/state/`.
+state. Canonical state lives under `.agent-context/state/`. This file is the
+map. Procedures live in `.agents/skills/`. See DEC-0004.
 
 ## 1. Context Protocol
 
@@ -39,51 +40,27 @@ When project information conflicts, use this order:
 Never let remembered context override repository evidence. Report unresolved
 conflicts rather than silently choosing a convenient version.
 
-## 3. Session Start Rules
+## 3. Where To Look
 
-- If canonical Project or Architecture state is missing or still templated,
-  follow `.agents/skills/project-init/SKILL.md`.
-- Otherwise prefer `.agents/skills/context-start/SKILL.md` for every new
-  session; it routes automatically to project bootstrap or task resume.
-- Use `context-resume` explicitly only when task continuation is intentionally
-  forced. Use `context-bootstrap` explicitly for project-level orientation.
-- Read `CURRENT_TASK.md` and `HANDOFF.md` before broad exploration.
-- Inspect branch, recent commits, working-tree status, and relevant diffs.
-- Do not load all source files, sessions, or archive entries by default.
-- Check for uncommitted work and preserve changes from other sessions.
+- Start a session with `.agents/skills/context-start/SKILL.md`. It selects
+  initialization, the project view, or task continuation.
+- Answer a status question by running `python .agent-context/scripts/context_status.py`.
+  Do not write state files for that question.
+- End meaningful unfinished work with `.agents/skills/session-handoff/SKILL.md`.
+- Record architecture, interface, or compatibility choices with
+  `.agents/skills/record-decision/SKILL.md`.
+- Archive old sessions with `.agents/skills/context-compact/SKILL.md`.
+- Do not load every source file, session, or archive entry by default.
+- Preserve uncommitted work from other sessions.
 
-## 4. During Work Rules
+## 4. Knowledge Rules
 
-- Keep scope tied to the current task; do not silently refactor unrelated code.
-- Prefer executable evidence over prose and label unverified claims.
-- Record architecture/interface/dependency/data-format decisions using the
-  `record-decision` Skill. Do not silently rewrite accepted history.
-- Store stable verified claims as Facts with evidence. Keep uncertain claims as
-  Hypotheses with a validation plan. A verified hypothesis creates a separate
-  Fact; retain the hypothesis history.
-- Keep discoveries separate until they merit a Fact or Decision.
-- Run relevant tests or checks before calling work complete.
+- Facts require evidence. Hypotheses keep their uncertainty and a validation plan.
+- Do not promote a hypothesis, delete unique evidence, or rewrite an accepted
+  decision in place.
+- Compaction extracts knowledge before archiving. It does not concatenate history.
 
-## 5. Session End Rules
-
-For meaningful unfinished work, follow the `session-handoff` Skill:
-
-- reconcile task state with Git and tests;
-- update `CURRENT_TASK.md` and `HANDOFF.md`;
-- preserve failed attempts and concrete evidence;
-- create a structured session summary, never a chat transcript;
-- update decisions or memory only when their standards are met.
-
-## 6. History and Compaction
-
-- Recent summaries live in `.agent-context/sessions/`; old summaries live in
-  `.agent-context/archive/` and are not default context.
-- Compaction means extracting knowledge into canonical state/memory before
-  archiving. It must not concatenate history into an ever-growing summary.
-- Never promote a hypothesis, delete unique evidence, overwrite unfinished
-  state, or modify product code during compaction.
-
-## 7. Safety Rules
+## 5. Safety Rules
 
 - Never store credentials, tokens, passwords, private keys, `.env` values, or
   other secrets in context files.
@@ -93,7 +70,7 @@ For meaningful unfinished work, follow the `session-handoff` Skill:
 - Do not run destructive operations without explicit authorization and verified
   targets.
 
-## 8. Validation
+## 6. Validation
 
 Use these entry points before completion:
 

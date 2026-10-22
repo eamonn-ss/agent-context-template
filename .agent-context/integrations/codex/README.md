@@ -6,10 +6,7 @@ Codex uses root `AGENTS.md` as the protocol entry and project Skills under
 - Discovery: open the repository root so `AGENTS.md` and project Skills are in
   scope.
 - First adoption: invoke or request `project-init`.
-- New session: invoke or request `context-start`; it routes to bootstrap or
-  resume.
-- Advanced explicit entry: use `context-bootstrap` for project orientation or
-  `context-resume` to force task continuation.
+- New session: invoke or request `context-start`. Follow only the selected section.
 - Handoff: invoke or request `session-handoff` before switching sessions/tools.
 
 Codex must still verify Git state and honor normal approval boundaries. Native

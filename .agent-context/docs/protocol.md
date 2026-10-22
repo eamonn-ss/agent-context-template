@@ -57,8 +57,8 @@ such as README and build manifests before shallow source exploration, records
 only evidence-backed Facts, and leaves uncertainty as a Hypothesis or Unknown.
 
 It does not create Current Task when no active engineering task has been
-defined. `project-init != context-bootstrap`: initialization creates canonical
-project context; bootstrap loads canonical project context that already exists.
+defined. `project-init` writes Project and Architecture. The BOOTSTRAP section
+of `context-start` only loads context that already exists.
 
 Files that merely exist are not necessarily initialized. Missing, empty, or
 placeholder-bearing Project and Architecture files require initialization.
@@ -71,8 +71,8 @@ Architecture, Current Task, Handoff, and available Git state, then selects:
 | Mode | Condition | Action |
 |---|---|---|
 | `INIT_REQUIRED` | Project or Architecture is missing or templated | Run `project-init` |
-| `RESUME` | Current Task is active and Handoff is usable | Run `context-resume` |
-| `BOOTSTRAP` | Project is initialized without a valid active task/handoff pair | Run `context-bootstrap` |
+| `RESUME` | Current Task is active and Handoff is usable | Follow RESUME in `context-start` |
+| `BOOTSTRAP` | Project is initialized without a valid active task/handoff pair | Follow BOOTSTRAP in `context-start` |
 
 Template Current Task and Handoff files are unusable. Terminal task statuses do
 not resume even when an older handoff remains present.
@@ -82,8 +82,8 @@ not resume even when an older handoff remains present.
 Bootstrap is project-oriented: it prioritizes Project, Architecture, status,
 decisions, and hypotheses, while keeping Git inspection shallow. Resume is
 task-oriented: it prioritizes Current Task, Handoff, task-relevant Git diffs,
-failed attempts, blockers, and the next action. Both remain available as
-advanced explicit entry points; `context-start` normally chooses between them.
+failed attempts, blockers, and the next action. Both are sections of
+`context-start`. A status question runs `context_status.py` and writes nothing.
 
 ## 9. First-run Lifecycle
 
@@ -97,8 +97,8 @@ development
 
 ## 10. Session Start
 
-Use `context-start` unless intentionally forcing bootstrap or resume. Do not scan
-all source or historical files unless evidence is insufficient.
+Use `context-start` for every new session. Do not scan all source or historical
+files unless evidence is insufficient.
 
 ## 11. During Session
 
@@ -108,11 +108,12 @@ Hypotheses. Do not update every context file mechanically after every edit.
 
 ## 12. Session Handoff
 
-A handoff must combine current task state with `git status --short`, diff stat,
-relevant diff evidence, and recent commits. It records completed work, modified
-files, decisions, current problems, attempts, failed approaches, evidence, open
-questions, next steps, and one suggested first action. Suspected secret values
-are never copied.
+A handoff records the Git commit and whether the worktree was clean or dirty,
+plus `git status --short` and `git diff --stat`. The full diff stays in Git.
+Important evidence is the command, its exit code, and the result. It also
+records completed work, modified files, decisions, current problems, attempts,
+failed approaches, open questions, next steps, and one suggested first action.
+Suspected secret values are never copied.
 
 ## 13. Resume
 

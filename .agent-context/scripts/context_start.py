@@ -81,10 +81,10 @@ def detect_mode(root: Path | str | None = None) -> dict[str, Any]:
         message = "Project context has not been initialized.\nRun /project-init first."
     elif task_is_active and handoff_is_usable:
         mode = "RESUME"
-        message = "Continue the active task using /context-resume."
+        message = "Continue the active task using the RESUME section of context-start."
     else:
         mode = "BOOTSTRAP"
-        message = "Load the initialized project view using /context-bootstrap."
+        message = "Load the project view using the BOOTSTRAP section of context-start."
     return {
         "mode": mode,
         "message": message,

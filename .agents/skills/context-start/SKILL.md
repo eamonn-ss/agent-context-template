@@ -1,27 +1,20 @@
 ---
 name: context-start
-description: Route a new repository session to initialization, project bootstrap, or active-task resume using canonical state and current Git evidence.
+description: Use at the start of every session. Do not use to create Project files, write a handoff, record a decision, or archive sessions.
 ---
 
 # Context Start
 
-Use this as the default entry point for every new session after the framework is
-installed. It routes to an existing lifecycle Skill; it does not replace their
-evidence and safety rules.
+Run `python .agent-context/scripts/context_start.py`, then
+`python .agent-context/scripts/context_status.py`. If freshness is stale, report
+the reason before following the section below. When the reason says the current
+work is not recorded, the previous session did not close. Preserve uncommitted
+work.
 
-## Route
+## INIT_REQUIRED
 
-1. Read `AGENTS.md` and preserve current uncommitted work.
-2. Inspect Project, Architecture, Current Task, and Handoff under
-   `.agent-context/state/`, plus concise Git state when Git is available.
-3. Run `python .agent-context/scripts/context_start.py` when available. Otherwise apply the
-   same rules below, treating missing, empty, or placeholder-bearing files as
-   unusable.
-
-### `INIT_REQUIRED`
-
-Select when Project or Architecture is missing or still contains scaffold
-placeholders. Return exactly these leading lines and stop normal loading:
+Project or Architecture is missing or still templated. Stop loading and run
+`project-init`. Return:
 
 ```text
 Mode: INIT_REQUIRED
@@ -29,19 +22,34 @@ Project context has not been initialized.
 Run /project-init first.
 ```
 
-### `RESUME`
+## RESUME
 
-Select only when Current Task is usable and active and Handoff is usable.
-Return `Mode: RESUME`, then follow `../context-resume/SKILL.md`. Prioritize the
-task, handoff, current Git changes, failed attempts, blockers, relevant
-decisions, and next action.
+Use only when the script selects RESUME. A completed or template task never
+uses this section.
 
-### `BOOTSTRAP`
+1. Read `.agent-context/state/CURRENT_TASK.md` and `HANDOFF.md`.
+2. Run `python .agent-context/scripts/context_status.py`. If freshness is stale,
+   report the Git mismatch before continuing.
+3. Read `git diff --stat`. Open a full diff only for files that disagree with
+   the handoff.
+4. Read decisions and open hypotheses cited by the task.
+5. Reconcile the handoff with code, tests, and Git before editing.
 
-Select when project context is initialized but no valid active-task/handoff pair
-exists, including when the previous task is complete. Return `Mode: BOOTSTRAP`,
-then follow `../context-bootstrap/SKILL.md`. Prioritize Project, Architecture,
-Current Task if usable, project status, decisions, and hypotheses.
+Report the goal, last completed work, blocker, modified files, failed attempts,
+relevant decisions, and the next action.
 
-A template Current Task is never active, a template Handoff is never usable,
-and a completed task never routes to Resume.
+## BOOTSTRAP
+
+Use only when the script selects BOOTSTRAP. Do not create Project or
+Architecture here.
+
+1. Read Project, Architecture, Current Task if it is usable, Handoff, the
+   decision index, and open hypotheses.
+2. Run `python .agent-context/scripts/collect_git_state.py --json` when
+   available. Otherwise read the branch, `git status --short`, and the latest
+   five commits.
+3. Do not read all sessions, archives, source files, or diffs. Exclude
+   `.agent-context/` and `.agents/` when exploring application code.
+
+Report the project, architecture, goal, status, branch, modified files,
+problems, open decisions, open hypotheses, and the recommended first action.

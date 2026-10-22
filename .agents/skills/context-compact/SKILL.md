@@ -1,6 +1,6 @@
 ---
 name: context-compact
-description: Extract durable knowledge from recent structured sessions and safely archive eligible history without changing code or promoting uncertainty.
+description: Use when old session summaries have had their durable knowledge extracted and are ready to archive. Do not use to summarize the current chat or promote a hypothesis.
 ---
 
 # Context Compact

@@ -4,6 +4,11 @@
 
 <GOAL>
 
+## Git Evidence
+
+- commit: <HEAD_SHA_OR_UNAVAILABLE>
+- worktree: clean
+
 ## Completed
 
 - <VERIFIED_COMPLETION>

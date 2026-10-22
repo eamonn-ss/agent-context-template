@@ -15,7 +15,7 @@ Evidence        application code, tests, and optional Git
 ## Lifecycle
 
 ```text
-project-init -> context-start -> bootstrap | resume -> work -> handoff
+project-init -> context-start (bootstrap | resume) -> work -> handoff
                        ^                              |
                        +-------- next session --------+
 ```

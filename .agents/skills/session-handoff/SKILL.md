@@ -1,34 +1,32 @@
 ---
 name: session-handoff
-description: Create a reliable cross-session or cross-agent handoff grounded in current task state, decisions, validation evidence, and Git changes.
+description: Use when ending unfinished work, switching agents, or when a finished task is still marked active. Do not use when the handoff already matches the task and Git state.
 ---
 
 # Session Handoff
 
-Use before ending substantial unfinished work, switching agents/tools, or when
-context is becoming unreliable.
-
-## Evidence First
-
-Inspect `.agent-context/state/CURRENT_TASK.md`,
-`.agent-context/state/DECISIONS.md`, and the relevant records.
-Collect `git status --short`, `git diff --stat`, `git diff`, and
-`git log --oneline -5`. Summarize diffs; never paste suspected credentials,
-tokens, private keys, `.env` values, or other secrets. Instead write:
+Collect `git status --short`, `git diff --stat`, `git rev-parse HEAD`, and
+`git log --oneline -5`. Leave the full diff in Git. Important Evidence is the
+command, its exit code, and one result sentence. If a diff may contain a
+secret, write only:
 
 `Sensitive value detected in changed file; content omitted.`
 
-## Write
+`Done when` names the command and the observed result.
 
-Update `.agent-context/state/HANDOFF.md` with Goal, Completed, Modified Files, Technical
-Decisions, Current Problem, Attempts Made, Failed Approaches, Important Evidence,
-Open Questions, Next Steps, and Suggested First Action. Preserve failed
-approaches even when none succeeded.
+- Good: `python -m unittest discover -s .agent-context/tests -v` exits 0.
+- Bad: "tests passed".
 
-Create one structured summary in `.agent-context/sessions/YYYY-MM-DD-NN.md` containing
-Objective, Completed, Decisions, Files Changed, Problems, Failed Attempts,
-Discoveries, and Next Step. Do not copy chat transcripts.
+Update `.agent-context/state/HANDOFF.md` using the sections in
+`.agent-context/templates/HANDOFF.template.md`. Git Evidence is:
 
-Update `CURRENT_TASK.md` to match verified state. Record commands and actual
-results, distinguish completed from merely written, and leave unrelated state
-untouched.
+```text
+- commit: <full HEAD sha, or unavailable>
+- worktree: clean
+```
+
+Use `dirty` when `git status --short` is not empty. Keep failed approaches,
+including when none succeeded.
+
+Write one `.agent-context/sessions/YYYY-MM-DD-NN.md` summary, not a transcript.
+Update `CURRENT_TASK.md` to match verified state only.
